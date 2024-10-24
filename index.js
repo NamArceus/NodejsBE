@@ -5,54 +5,32 @@
     var bodyParser = require("body-parser");
     const dotenv = require("dotenv");
     const morgan = require("morgan");
-    const {registerValidation, loginValidation} = require("./routes/Validator");
+    const authRouter = require("./routes/authRouter");
+    const userRouter = require("./routes/userRouter");
+    /*const {registerValidation, loginValidation} = require("./routes/Validator");
 
     //jwt token
     const jwt = require("jsonwebtoken");
     const bcrypt = require("bcryptjs");
 
     //Multer upload
-    const multer = require("multer");
-    const upload = multer({ dest: 'uploads/' });
+    const multer = require("multer");*/
+    
 
     // Swagger
     const swaggerUi = require("swagger-ui-express");
-    const swaggerJsdoc = require("swagger-jsdoc");
+    const swaggerDocument = require("./swagger");
 
-    // Khai báo và khởi tạo options trước
-    const options = {
-        definition: {
-            openapi: '3.0.0',
-            info: {
-                title: 'My API',
-                version: '1.0.0',
-                description: 'A simple Express API',
-            },
-            servers: [{
-                url: 'http://localhost:8000',
-            }],
 
-            components: {
-                securitySchemes: {
-                    bearerAuth: {
-                        type: 'http',
-                        scheme: 'bearer',
-                        bearerFormat: 'JWT',
-                    }
-                }
-            }
-        },
-        apis: ['./routes/player-routes.js'], 
-    };
-
-    // Sau đó khai báo swaggerDocument
-    const swaggerDocument = swaggerJsdoc(options);
 
     app.use(bodyParser.json({limit:"50mb"})); 
     app.use(cors());
     app.use(morgan("common"));
     app.use(express.json());
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); 
+    app.use('/uploads', express.static('uploads'));
+    app.use('/auth', authRouter);
+    app.use('/user', userRouter);
 
 
     dotenv.config();
@@ -73,64 +51,10 @@
         console.log("Server is running");
     });
 
-    //Create database player
+
+
+    /*//Create database player
     const Schema = mongoose.Schema;
-
-
-    /*const players = new Schema({
-        firstName: {type: 'string', required: true},
-        lastName: {type: 'string', required: true},
-        gender : {type: 'string', required: true},
-        team: {type: 'string', required: true }
-    });
-
-
-    const Player0 = mongoose.model('player', player);
-
-    const player0 = {
-        firstName: 'Nhat',
-        lastName: 'Nam',
-        gender: 'Male',
-        team: 'Manchester United'
-    }
-
-
-
-    //Create players in database
-    const user0 = Player.create(player0)
-        .then((e) => {
-            console.log('Player created successfully');
-            console.log(e); 
-        })
-        .catch(err => {
-            console.error('Error creating player:', err);
-        });
-
-
-    app.get('/api/players' , (req, res) => {
-        res.json(player0);
-    });
-
-
-
-    app.post('/resgister', (req, res) => {
-        var username = req.body.username
-        var password = req.body.password
-        AccountModel.create({ 
-            username: username,
-            password: password })
-        .then(data => {
-            res.json('Tao tai khoan thanh cong')
-        })
-        .catch(err => {
-            res.status(500).send('Tao tai khoan that bai')
-        })
-    });
-
-    app.get('/', (req, res) => {
-        res.json('Home');
-    })*/
-
 
     const player = new Schema({
         username: {type: 'string', required: true},
@@ -142,46 +66,6 @@
 
 
     const Player = mongoose.model('player', player);
-
-    /*const player1 = {
-        username: 'admin',
-        password: '123456789'
-    }
-
-
-
-
-
-    // players in database
-    const user = Player.findOneAndUpdate({username: player1.username}, {$set: {password: 123456789}} )
-        .then((updateplayer) => {
-            console.log('Player update successfully');
-            console.log(updateplayer); 
-        })
-        .catch(err => {
-            console.error('Error update player:', err); 
-        });*/
-
-    /*app.post('/api/register', (req, res) => {
-        var username = req.body.username
-        var password = req.body.password
-        Player.create({
-            username: username,
-            password: password
-        })
-        .then(data => {
-            res.json('Tao tai khoan thanh cong')
-        })
-        .catch(err => {
-            res.status(500).send('Tao tai khoan that bai')
-        })
-    })
-
-
-    app.get('/api/players' , (req, res) => {
-        res.json(player1);
-    });*/
-
 
 
     //api register
@@ -236,26 +120,10 @@
                 return res.status(401).send('Username not found');
             }
 
-            
-            /*const validPassword = await bcrypt.compare(password, user.password);
-            
-            if (!validPassword){
-                return res.status(401).send('Invalid password');
-            }
-            
-            
-
-        if(password === user.password){
-            const accessToken = jwt.sign({ userId: user._id , username:user.username }, process.env.JWT_SECRET, { expiresIn: '24h' });
-            res.json(accessToken); 
-        } 
-        else {
-            res.status(401).send("Invalid password");
-        }*/
 
             const validPassword = await bcrypt.compare(password, user.password);  // So sánh password nhập vào với password đã mã hóa trong DB
             if (!validPassword) {
-                return res.status(401).send('Mật khẩu không đúng');  // Nếu password không khớp, trả về lỗi
+                return res.status(401).send('Mật khẩu không đúng');
             }
 
             // Tạo Access Token
@@ -339,31 +207,14 @@
 
 
     //UPDATE
-    /*app.put('/api/update',verifyTokenAndUserAuthorization , async(req, res) => {
-        try {
-            const {_id, newUsername, newPassword } = req.body;
-            const user = await Player.findOneAndUpdate(_id ,{
-                username: newUsername,
-                password: newPassword
-            });
-            if(!user){
-                return res.status(404).send('User not found');
-            }
-
-            res.status(200).send("User update success");
-        }
-        catch (err) {
-            console.error(err);
-            res.status(500).send('Error updating user');
-        }
-    });*/
     app.put('/api/update/:id', verifyTokenAndUserAuthorization, async (req, res) => {
         try {
-            const { newUsername, newPassword } = req.body;
+            const { newUsername, newPassword, role } = req.body;
             const hashedPassword = await bcrypt.hash(newPassword, 12);
             const updatedUser = await Player.findByIdAndUpdate(req.params.id, {
                 username: newUsername,
-                password: hashedPassword
+                password: hashedPassword,
+                role: role
             }, { new: true });
 
             if (!updatedUser) {
@@ -379,7 +230,19 @@
 
 
     //UPLOAD
-    app.post('/api/upload' , upload.single('file') , async (req, res) => {
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'uploads/');
+        },
+        filename: function (req, file, cb) {
+            cb(null, Date.now() + '-' + file.originalname);
+        }
+    });
+    const upload = multer({ storage });
+
+
+    app.post('/api/upload' , upload.single('file') , (req, res) => {
+        
         console.log(req.file);
         res.status(200).send('Upload successful');
     })
@@ -388,18 +251,6 @@
 
 
     // VERIFY
-    /*const verifyToken = (req, res, next) => {
-        const authHeader = req.headers.authorization;  // Lấy header authorization
-        const token = authHeader && authHeader.split(' ')[1];  // Tách Bearer và token
-
-        if (token == null) return res.status(401).send("Requires token for authentication");
-
-        jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, user) => {
-            if (err) return res.status(403).send("Token invalid");
-            req.user = user;  // Gán thông tin user vào request
-            next();  // Tiếp tục xử lý request
-        });
-    };*/
     const verifyToken = (req, res, next) => {
         const authHeader = req.headers.authorization;
         const token = authHeader && authHeader.split(' ')[1]; // Lấy token từ header
@@ -454,4 +305,4 @@
             console.error(error);
             res.status(500).send('server error'); 
         }
-    });
+    });*/
