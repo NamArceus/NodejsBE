@@ -28,7 +28,7 @@
     app.use(morgan("common"));
     app.use(express.json());
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); 
-    app.use('/uploads', express.static('uploads'));
+    app.use('/uploads', express.static("uploads"), userRouter);
     app.use('/auth', authRouter);
     app.use('/user', userRouter);
 

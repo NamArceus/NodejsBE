@@ -11,13 +11,13 @@ const upload = require("../multer");
 
 
 //GET ALL USERS
-router.get("/", verifyToken, userController.getAllUser);
+router.get("/user/getuser", verifyToken, userController.getAllUser);
 
 
 //POST DELETE
 /**
  * @swagger
- * /api/delete/{username}:
+ * /user/delete/{username}:
  *   delete:
  *     summary: Delete a player
  *     description: Deletes a player based on the username. Requires admin privileges.
@@ -74,13 +74,13 @@ router.get("/", verifyToken, userController.getAllUser);
 
 
 
-router.post('/api/delete/:username', verifyTokenAndUserAuthorization, userController.deleteUser);
+router.post('/user/delete/:username', verifyTokenAndUserAuthorization, userController.deleteUser);
 
 
 //UPDATE
 /**
  * @swagger
- * /api/update/{id}:
+ * /user/update/{id}:
  *   put:
  *     summary: Update user information
  *     description: Updates a user's username and password based on their ID.
@@ -133,14 +133,14 @@ router.post('/api/delete/:username', verifyTokenAndUserAuthorization, userContro
 
 
 
-router.put('/api/update/:id', verifyTokenAndAdmin, userController.updateUser);
+router.put('/user/update/:id', verifyTokenAndAdmin, userController.updateUser);
 
 
 
 //UPLOAD
 /**
  * @swagger
- * /api/upload:
+ * /uploads:
  *   post:
  *     summary: Upload a file
  *     description: Uploads a file to the server.
@@ -162,6 +162,6 @@ router.put('/api/update/:id', verifyTokenAndAdmin, userController.updateUser);
  */
 
 
-router.post('/upload', upload.single('file'), userController.uploadFile);
+router.post('/upload', upload.array('files',5), userController.uploadFile);
 
 module.exports = router;

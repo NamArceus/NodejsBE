@@ -6,7 +6,7 @@ const authController = require('../controller/authController');
 //POST REGISTER
 /**
  * @swagger
- * /api/register:
+ * /auth/register:
  *   post:
  *     summary: Register a new user
  *     description: Register user
@@ -23,6 +23,8 @@ const authController = require('../controller/authController');
  *               password:
  *                 type: string
  *                 description: The password for the new user.
+ *               role:
+ *                 type: string
  *     responses:
  *       200:
  *         description: User registered successfully
@@ -50,7 +52,7 @@ router.post('/register', authController.registerUser);
 //POST LOGIN
 /**
  * @swagger
- * /api/login:
+ * /auth/login:
  *  post:
  *    summary: Log user into the system
  *    description: Login player
